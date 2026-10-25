@@ -97,7 +97,7 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .sidebar-footer { display: flex; align-items: center; padding: 16px 22px; gap: 9px; border-top: 1px solid var(--border); font-size: 10.5px; color: #9ca5a6; flex-shrink: 0; }
 .save-light { width: 7px; height: 7px; border-radius: 50%; background: #57bd82; box-shadow: 0 0 0 3px #eff9f1; }
 .workspace { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
-.topbar { min-height: 100px; background: white; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 29px; border-bottom: 1px solid var(--border); }
+.topbar { min-height: 60px; background: white; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 24px; border-bottom: 1px solid var(--border); }
 .project-title-wrap { min-width: 150px; display: flex; flex-direction: column; gap: 4px; }
 .overline { color: #9ca3a8; font-weight: 780; font-size: 9px; letter-spacing: 1.1px; }
 .project-title { border: 1px solid transparent; background: transparent; font-size: 22px; font-weight: 760; color: #262d2c; letter-spacing: -.65px; width: min(100%, 450px); margin-left: -4px; padding: 2px 4px; border-radius: 4px; text-overflow: ellipsis; }

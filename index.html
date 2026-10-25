@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Plan Minecraft buildings, one block and one floor at a time.">
+  <title>BlockPlan | Minecraft Floorplan Designer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z M3 7l9 5 9-5 M12 12v10"/></symbol>
+    <symbol id="i-block" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1" fill="currentColor" stroke="none"/><rect x="13" y="4" width="7" height="7" rx="1" fill="currentColor" stroke="none"/><rect x="4" y="13" width="7" height="7" rx="1" fill="currentColor" stroke="none"/><rect x="13" y="13" width="7" height="7" rx="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-rectangle" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18 M3 15h18" opacity=".4"/></symbol>
+    <symbol id="i-bed" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 9h14 M8 4h8v3H8z M7 12v7 M17 12v7"/></symbol>
+    <symbol id="i-stairs" viewBox="0 0 24 24"><path d="M3 20h6v-5h6v-5h6V4 M3 20h18 M21 4v16"/></symbol>
+    <symbol id="i-wall" viewBox="0 0 24 24"><path d="M3 5h18v14H3z M3 12h18 M9 5v7 M15 12v7"/></symbol>
+    <symbol id="i-eraser" viewBox="0 0 24 24"><path d="m8 21-5-5 10-12a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 9H8Z M10 9l8 8 M13 21h8"/></symbol>
+    <symbol id="i-door" viewBox="0 0 24 24"><path d="M4 21V3h12v18 M16 21h4 M16 3v18 M10 12h.01"/></symbol>
+    <symbol id="i-window" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M12 5v14 M3 12h18 M6 8h3 M15 15h3"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20l-4-4Z M11 9l3 3 M8 12l2 2 M14 6l2 2"/></symbol>
+    <symbol id="i-label" viewBox="0 0 24 24"><path d="M4 5h16v14H4z M8 9h8 M8 13h5"/></symbol>
+    <symbol id="i-boundary" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1" stroke-dasharray="3 3"/></symbol>
+    <symbol id="i-select" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1" stroke-dasharray="3 3"/><path d="m9 9 8 4-4 1-1 4-3-9Z"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V6a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v7-5a2 2 0 0 1 4 0v9c0 4-3 6-6 6h-4c-2 0-3-1-4-3l-3-5a2 2 0 0 1 3-2l2 2Z"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5 M4 9h10a6 6 0 0 1 0 12h-2"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5 M20 9H10a6 6 0 0 0 0 12h2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16 M4 12h16"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v5 M14 11v5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 20 4.5-1 11-11a2.12 2.12 0 0 0-3-3l-11 11L4 20Z M15 7l3 3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13 m-5-5 5 5 5-5 M4 17v4h16v-4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3 m-5 5 5-5 5 5 M4 17v4h16v-4"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m4 18 5-5 3 3 3-3 5 5"/></symbol>
+    <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M4 9V4h5 M15 4h5v5 M20 15v5h-5 M9 20H4v-5"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6 M20 4v7h-7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 4v16 M4 10h16"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z M3 12l9 5 9-5 M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-1.5 1.1-1.7 1.6-1.7 3"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+  </svg>
+
+  <div class="app">
+    <aside class="sidebar" aria-label="Editor tools and floors">
+      <div class="brand">
+        <div class="brand-logo"><svg class="icon"><use href="#i-cube"></use></svg></div>
+        <div><div class="brand-name">BlockPlan<span class="brand-dot">.</span></div><div class="brand-tag">MINECRAFT BUILD PLANNER</div></div>
+      </div>
+
+      <div class="sidebar-content">
+        <section class="side-section tools-section">
+          <div class="section-header"><h2>Tools</h2><span>SHORTCUT</span></div>
+          <div class="tool-groups" id="toolList">
+            <details class="tool-group" open>
+              <summary class="tool-group-header"><span class="tool-group-mark"><svg class="icon"><use href="#i-wall"></use></svg></span><span class="tool-group-title">Build tools<small>Walls and outline</small></span><span class="tool-group-count">4</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <div class="tool-list">
+                <button type="button" class="tool active" data-tool="wall" aria-pressed="true"><span class="tool-icon"><svg class="icon"><use href="#i-wall"></use></svg></span><span>Wall line</span><kbd>W</kbd></button>
+                <button type="button" class="tool" data-tool="rectangle" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-rectangle"></use></svg></span><span>Rectangle walls</span><kbd>Q</kbd></button>
+                <button type="button" class="tool" data-tool="block" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-block"></use></svg></span><span>Single blocks</span><kbd>B</kbd></button>
+                <button type="button" class="tool" data-tool="boundary" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-boundary"></use></svg></span><span>Build boundary</span><kbd>O</kbd></button>
+              </div>
+              <div class="boundary-controls" id="boundaryControls" hidden>
+                <p>Drag from one corner to the opposite corner. This guide does not place blocks.</p>
+                <button type="button" class="text-action" id="clearBoundary">Clear boundary</button>
+              </div>
+            </details>
+            <details class="tool-group" open>
+              <summary class="tool-group-header"><span class="tool-group-mark"><svg class="icon"><use href="#i-door"></use></svg></span><span class="tool-group-title">Doors &amp; furniture<small>Fixtures and openings</small></span><span class="tool-group-count">4</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <div class="tool-list">
+                <button type="button" class="tool" data-tool="door" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-door"></use></svg></span><span>Door</span><kbd>D</kbd></button>
+                <button type="button" class="tool" data-tool="window" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-window"></use></svg></span><span>Window</span><kbd>X</kbd></button>
+                <button type="button" class="tool" data-tool="bed" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-bed"></use></svg></span><span>Bed (1 × 2)</span><kbd>F</kbd></button>
+                <button type="button" class="tool" data-tool="stairs" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-stairs"></use></svg></span><span>Stairs</span><kbd>G</kbd></button>
+              </div>
+              <div class="object-controls" id="objectControls" hidden>
+                <div class="detail-row"><span id="objectHeading">Orientation</span><strong id="objectAngle">0°</strong></div>
+                <button type="button" class="button button-outline button-full" id="rotateObject"><svg class="icon"><use href="#i-rotate"></use></svg> Rotate <kbd>R</kbd></button>
+                <p id="objectHelp">Press R to rotate before placing an object.</p>
+              </div>
+            </details>
+            <details class="tool-group" open>
+              <summary class="tool-group-header"><span class="tool-group-mark"><svg class="icon"><use href="#i-select"></use></svg></span><span class="tool-group-title">Edit &amp; measure<small>Move, measure and label</small></span><span class="tool-group-count">5</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <div class="tool-list">
+                <button type="button" class="tool" data-tool="select" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-select"></use></svg></span><span>Select &amp; move</span><kbd>S</kbd></button>
+                <button type="button" class="tool" data-tool="measure" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-ruler"></use></svg></span><span>Measure</span><kbd>M</kbd></button>
+                <button type="button" class="tool" data-tool="erase" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-eraser"></use></svg></span><span>Eraser</span><kbd>E</kbd></button>
+                <button type="button" class="tool" data-tool="label" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-label"></use></svg></span><span>Room label</span><kbd>T</kbd></button>
+                <button type="button" class="tool" data-tool="pan" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-hand"></use></svg></span><span>Move canvas</span><kbd>V</kbd></button>
+              </div>
+              <div class="measure-controls" id="measureControls" hidden>
+                <p class="measure-tip">Drag on the grid to measure, without placing or changing blocks.</p>
+                <div class="measure-mode" role="group" aria-label="Measurement type">
+                  <button type="button" class="measure-mode-btn active" data-measure-mode="line" aria-pressed="true">↗ Line</button>
+                  <button type="button" class="measure-mode-btn" data-measure-mode="area" aria-pressed="false">▢ Area</button>
+                </div>
+                <div class="measure-output" id="measureOutput" role="status" aria-live="polite">
+                  <strong id="measureResult">Ready to measure</strong>
+                  <span id="measureDetails">Drag between two points on the grid.</span>
+                </div>
+                <button type="button" class="button button-outline button-full" id="clearMeasure" disabled>Clear measurement</button>
+                <p>Measurements are temporary guides, not Minecraft blocks. They are not saved or included in PNG exports.</p>
+              </div>
+              <div class="select-controls" id="selectControls" hidden>
+                <p>Drag a rectangle to select blocks, windows, doors, beds, stairs and labels. Drag the selection to move everything together.</p>
+                <div class="selection-detail" id="selectionDetail">Nothing selected</div>
+                <button type="button" class="button button-outline button-full" id="clearSelection" disabled>Clear selection <kbd>Esc</kbd></button>
+                <p>Press <kbd>Delete</kbd> to remove selected items. Use Undo to restore them.</p>
+              </div>
+            </details>
+          </div>
+          <p class="tools-help-tip">Not sure what a tool does? <button type="button" id="sidebarHelp" class="text-action">View tool guide</button></p>
+        </section>
+
+        <section class="side-section floors-section">
+          <div class="section-header"><h2>Floors</h2><span id="floorCount" class="count-pill">1 / 1</span></div>
+          <div id="floorList" class="floor-list" aria-label="Building floors"></div>
+          <div class="floor-actions">
+            <button type="button" id="addFloor" class="button button-outline"><svg class="icon"><use href="#i-plus"></use></svg> Blank floor</button>
+            <button type="button" id="duplicateFloor" class="button button-primary"><svg class="icon"><use href="#i-copy"></use></svg> Copy floor</button>
+          </div>
+          <label class="check-row"><input type="checkbox" id="showBelow" checked><span class="custom-check"></span> Show floor below <span class="muted">(faint)</span></label>
+        </section>
+
+        <section class="side-section options-section">
+          <div class="section-header"><h2>Plan settings</h2></div>
+          <button type="button" class="settings-row" id="resizeGrid"><svg class="icon"><use href="#i-settings"></use></svg> Grid dimensions <strong id="gridDimensions">48 × 32</strong></button>
+          <div class="tips"><div class="tips-heading">QUICK TIPS</div><p>Left click to place or draw, right click to erase, and hold the middle mouse button to move around the canvas. Scroll to zoom.</p><p>Press <kbd>M</kbd> to measure a distance or room area, or hold <kbd>Space</kbd> and drag to pan.</p><p>Use <kbd>?</kbd> or the <strong>Help</strong> button to see what every tool does.</p></div>
+        </section>
+      </div>
+      <div class="sidebar-footer"><div class="save-light"></div><span>Auto-saved in this browser</span></div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="workspace-heading"><span class="overline">YOUR WORKSPACE</span><strong>My builds</strong><span class="workspace-caption">Each tab is a separate build</span></div>
+        <nav class="top-actions" aria-label="Project actions">
+          <button type="button" class="button button-help" id="openHelp" aria-haspopup="dialog" aria-controls="helpDialog"><svg class="icon"><use href="#i-help"></use></svg> Help</button>
+          <span class="top-action-divider" aria-hidden="true"></span>
+          <button type="button" class="button button-subtle" id="importPlan"><svg class="icon"><use href="#i-upload"></use></svg> Import</button>
+          <button type="button" class="button button-outline" id="exportJson"><svg class="icon"><use href="#i-download"></use></svg> Save build</button>
+          <button type="button" class="button button-outline" id="exportWorkspace" title="Back up all build tabs as one JSON file"><svg class="icon"><use href="#i-layers"></use></svg> Save all</button>
+          <button type="button" class="button button-dark" id="exportPng"><svg class="icon"><use href="#i-image"></use></svg> Export PNG</button>
+        </nav>
+      </header>
+      <div class="build-tabs-bar" aria-label="Build tabs">
+        <div class="build-tabs-scroll" id="buildTabs" role="tablist" aria-label="Open Minecraft builds"></div>
+        <div class="build-tabs-actions">
+          <button type="button" class="tab-action" id="renameBuild" title="Rename active build" aria-label="Rename active build"><svg class="icon"><use href="#i-edit"></use></svg></button>
+          <button type="button" class="tab-action" id="duplicateBuild" title="Duplicate active build" aria-label="Duplicate active build"><svg class="icon"><use href="#i-copy"></use></svg></button>
+          <button type="button" class="tab-add" id="newBuild" title="Create a new blank build" aria-label="New build"><svg class="icon"><use href="#i-plus"></use></svg><span>New build</span></button>
+        </div>
+      </div>
+
+      <div class="editorbar">
+        <div class="editorbar-left"><span class="floor-overline">EDITING FLOOR</span><svg class="icon breadcrumb-icon"><use href="#i-chevron"></use></svg><strong id="activeFloorHeading">Floor 1</strong><span class="floor-tag" id="floorIndexTag">LEVEL 01</span></div>
+        <div class="editorbar-right">
+          <button type="button" class="icon-button" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="icon"><use href="#i-undo"></use></svg></button>
+          <button type="button" class="icon-button" id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg class="icon"><use href="#i-redo"></use></svg></button>
+          <span class="divider-vertical"></span>
+          <button type="button" class="icon-button zoom-button" id="zoomOut" aria-label="Zoom out" title="Zoom out">−</button>
+          <span id="zoomValue" class="zoom-value">100%</span>
+          <button type="button" class="icon-button zoom-button" id="zoomIn" aria-label="Zoom in" title="Zoom in">+</button>
+          <button type="button" class="icon-button" id="fitView" title="Fit grid to window" aria-label="Fit grid to window"><svg class="icon"><use href="#i-maximize"></use></svg></button>
+        </div>
+      </div>
+
+      <div class="mouse-guide" aria-label="Drawing mouse controls">
+        <span><strong>Left click + drag</strong> Place or draw</span>
+        <span><strong>Right click + drag</strong> Erase</span>
+        <span><strong>Hold middle click + drag</strong> Move canvas</span>
+      </div>
+
+      <div class="canvas-region" id="viewport">
+        <canvas id="planCanvas" tabindex="0" aria-label="Minecraft building floorplan. Use the selected tools to draw on the grid."></canvas>
+        <div class="wall-measure" id="wallMeasure" role="status" aria-live="off" hidden>1 block</div>
+        <div class="canvas-hint" id="canvasHint"><span class="hint-icon">✦</span><span id="hintText">Click and drag to draw a straight wall</span><span class="hint-close" id="hintClose" role="button" tabindex="0" aria-label="Dismiss hint">×</span></div>
+        <div class="canvas-legend"><span class="legend-item"><i class="legend-block"></i> Block</span><span class="legend-item"><i class="legend-door"></i> Door</span><span class="legend-item"><i class="legend-window"></i> Window</span><span class="legend-item"><i class="legend-bed"></i> Bed</span><span class="legend-item"><i class="legend-stairs"></i> Stairs</span><span class="legend-item"><i class="legend-boundary"></i> Boundary</span></div>
+      </div>
+
+      <footer class="statusbar"><span id="cursorPosition">CELL: −, −</span><span class="status-separator">·</span><span id="floorStats">0 blocks · 0 doors · 0 labels</span><span class="status-spacer"></span><span id="boundaryStats">No boundary set</span><span class="status-separator">·</span><span id="saveStatus">Saved</span></footer>
+    </main>
+  </div>
+
+  <dialog id="editorDialog" class="editor-dialog" aria-labelledby="modalTitle">
+    <form id="modalForm">
+      <div class="modal-top"><div class="modal-kicker">BLOCKPLAN EDITOR</div><h2 id="modalTitle">Edit</h2><p id="modalDescription"></p></div>
+      <div id="modalFields" class="modal-fields"></div>
+      <div class="modal-actions"><button type="button" class="button button-outline" id="cancelModal">Cancel</button><button type="submit" class="button button-dark" id="confirmModal">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="helpDialog" class="help-dialog" aria-labelledby="helpTitle" aria-describedby="helpDescription">
+    <div class="help-header">
+      <div><div class="modal-kicker">BLOCKPLAN GUIDE</div><h2 id="helpTitle">Tools &amp; shortcuts</h2><p id="helpDescription">Each grid square represents one Minecraft block. Use this guide whenever you need a reminder.</p></div>
+      <button type="button" class="help-close" id="closeHelp" aria-label="Close help" title="Close help">×</button>
+    </div>
+    <div class="help-body">
+      <section class="help-section">
+        <h3><svg class="icon"><use href="#i-wall"></use></svg> Build tools</h3>
+        <div class="help-item"><div><strong>Wall line</strong><kbd>W</kbd></div><p>Drag horizontally or vertically for a straight line of black blocks. The live counter includes both end blocks.</p></div>
+        <div class="help-item"><div><strong>Rectangle walls</strong><kbd>Q</kbd></div><p>Drag between opposite corners to place four connected walls. The preview shows the width × depth in blocks.</p></div>
+        <div class="help-item"><div><strong>Single blocks</strong><kbd>B</kbd></div><p>Click or drag to paint individual solid blocks anywhere on your floorplan.</p></div>
+        <div class="help-item"><div><strong>Build boundary</strong><kbd>O</kbd></div><p>Draw a dashed outline marking your plot or building limits. This is a guide, not actual blocks.</p></div>
+      </section>
+      <section class="help-section">
+        <h3><svg class="icon"><use href="#i-door"></use></svg> Doors &amp; furniture</h3>
+        <div class="help-item"><div><strong>Door</strong><kbd>D</kbd></div><p>Place a door in one square. Click an existing door to turn it, or press R before placing.</p></div>
+        <div class="help-item"><div><strong>Window</strong><kbd>X</kbd></div><p>Place a blue window in a wall or drag to make a row. A window replaces a wall block in that square.</p></div>
+        <div class="help-item"><div><strong>Bed</strong><kbd>F</kbd></div><p>Place a two-square bed with a marked pillow end. Rotate to position the head of the bed.</p></div>
+        <div class="help-item"><div><strong>Stairs</strong><kbd>G</kbd></div><p>Click or drag to mark a staircase. Lines show steps and the arrow indicates which way it faces.</p></div>
+      </section>
+      <section class="help-section">
+        <h3><svg class="icon"><use href="#i-select"></use></svg> Edit &amp; navigate</h3>
+        <div class="help-item"><div><strong>Select &amp; move</strong><kbd>S</kbd></div><p>Drag to select blocks, windows, doors, beds, stairs and labels. Then drag inside the selection to move everything together.</p></div>
+        <div class="help-item"><div><strong>Measure</strong><kbd>M</kbd></div><p>Choose <b>Line</b> to measure between two squares or <b>Area</b> to measure a room by dragging across its interior. The tool shows width × depth and area in blocks². Measurements never change the saved build.</p></div>
+        <div class="help-item"><div><strong>Eraser</strong><kbd>E</kbd></div><p>Click or drag to remove items. Right-click and drag to erase with any drawing tool.</p></div>
+        <div class="help-item"><div><strong>Room label</strong><kbd>T</kbd></div><p>Give rooms names like Kitchen or Bathroom. Labels are notes and do not represent Minecraft blocks.</p></div>
+        <div class="help-item"><div><strong>Move canvas</strong><kbd>V</kbd></div><p>Drag the view around without changing blocks. You can also hold Space while dragging.</p></div>
+      </section>
+      <section class="help-section">
+        <h3><svg class="icon"><use href="#i-layers"></use></svg> Floors, view &amp; files</h3>
+        <div class="help-item"><div><strong>Build tabs</strong></div><p>Each tab has its own dimensions, floors and blocks. Use <b>New build</b> to start another, the pencil to rename, and the copy icon to duplicate. Click × on a tab to close it, which deletes its saved build. Switching tabs automatically saves your work.</p></div>
+        <div class="help-item"><div><strong>Floors</strong></div><p><b>Blank floor</b> starts a new empty level within the current build. <b>Copy floor</b> duplicates its current level. <b>Show floor below</b> displays a faint guide.</p></div>
+        <div class="help-item"><div><strong>Undo, redo &amp; selection</strong></div><p><kbd>Ctrl</kbd> + <kbd>Z</kbd> to undo, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> to redo, <kbd>Esc</kbd> to deselect, <kbd>Delete</kbd> to delete the selection.</p></div>
+        <div class="help-item"><div><strong>Mouse controls</strong></div><p><b>Left click and drag</b> to place or draw, <b>right click and drag</b> to erase, and <b>hold middle click and drag</b> to pan the canvas. You can also hold <kbd>Space</kbd> and drag to pan.</p></div>
+        <div class="help-item"><div><strong>Rotate &amp; zoom</strong></div><p>Press <kbd>R</kbd> while using a door, window, bed or stairs tool to change placement direction. Scroll or use + and − to zoom. The fit button resets the view.</p></div>
+        <div class="help-item"><div><strong>Temporary ruler</strong></div><p>Measurements stay visible until cleared or you switch floors/builds. Use <b>Clear measurement</b> or <kbd>Esc</kbd>. They are omitted from JSON and PNG exports.</p></div>
+        <div class="help-item"><div><strong>Saving &amp; exporting</strong></div><p>All tabs auto-save in this browser. <b>Save build</b> exports only the active build, <b>Save all</b> backs up every build tab, <b>Import</b> adds saved builds as new tabs, and <b>Export PNG</b> exports the active floor.</p></div>
+      </section>
+    </div>
+    <div class="help-footer"><span><kbd>?</kbd> Open this guide anytime</span><button type="button" class="button button-dark" id="doneHelp">Got it</button></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
+</body>
+</html>

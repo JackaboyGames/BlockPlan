@@ -21,7 +21,7 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible { outli
 .icon { width: 17px; height: 17px; flex: 0 0 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .app { position: fixed; inset: 0; display: flex; width: 100%; height: 100dvh; min-height: 0; overflow: hidden; }
 .sidebar { display: flex; flex-direction: column; width: 274px; min-width: 274px; min-height: 0; height: 100%; background: var(--panel); border-right: 1px solid var(--border); z-index: 3; }
-.brand { display: flex; align-items: center; gap: 11px; height: 100px; padding: 24px 23px 20px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+.brand { display: flex; align-items: center; gap: 11px; height: 60px; padding: 10px 23px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
 .brand-logo { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 11px; color: white; background: #283b33; transform: rotate(-6deg); }
 .brand-logo .icon { width: 25px; height: 25px; stroke-width: 1.7; transform: rotate(6deg); }
 .brand-name { font-weight: 790; letter-spacing: -.8px; font-size: 22px; line-height: 1.08; }
@@ -226,7 +226,7 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .workspace-heading { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 145px; }
 .workspace-heading strong { font-size: 21px; line-height: 1.15; font-weight: 790; letter-spacing: -.7px; color: #27342e; }
 .workspace-caption { font-size: 10px; color: #9aaba0; }
-.build-tabs-bar { flex: 0 0 auto; display: flex; align-items: stretch; min-height: 57px; background: #f6f8f7; border-bottom: 1px solid #dfe7e2; padding: 8px 22px 0; gap: 12px; min-width: 0; }
+.build-tabs-bar { flex: 0 0 auto; display: flex; align-items: stretch; min-height: 45px; background: #f6f8f7; border-bottom: 1px solid #dfe7e2; padding: 8px 22px 0; gap: 12px; min-width: 0; }
 .build-tabs-scroll { display: flex; flex: 1; align-items: stretch; overflow-x: auto; overflow-y: hidden; gap: 5px; min-width: 0; scrollbar-width: thin; }
 .build-tab { display: flex; flex: 0 0 auto; align-items: center; max-width: 240px; min-width: 104px; min-height: 42px; align-self: flex-end; background: #e9eeeb; border: 1px solid #e1e8e2; border-bottom: 0; border-radius: 9px 9px 0 0; padding: 0 5px 0 2px; color: #68756d; }
 .build-tab:hover { background: #e5ece7; }
@@ -246,7 +246,7 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .tab-add:hover { background: #d6eedd; }
 .tab-add .icon { width: 14px; height: 14px; }
 @media (max-width: 1100px) {
-  .topbar { min-height: 80px; }
+  .topbar { min-height: 60px; }
   .workspace-heading strong { font-size: 17px; }
   .workspace-caption { display: none; }
   .build-tabs-bar { padding-left: 12px; padding-right: 12px; }
@@ -286,7 +286,7 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .tool-group .tool-list > .measure-controls,
 .tool-group .tool-list > .select-controls,
 .tool-group .tool-list > .boundary-controls,
-.tool-group .tool-list > .object-controls { margin: 2px 3px 9px 31px; padding: 10px; border-radius: 8px; border-left: 3px solid #b5d7c5; }
+.tool-group .tool-list > .object-controls { margin: 2px 0 9px; width: 100%; padding: 10px; border-radius: 8px; border-left: 3px solid #b5d7c5; }
 .tool-group .tool-list > .measure-controls { border-left-color: #9dbce9; }
 @media (max-width: 1100px) { .mouse-guide { padding-left: 18px; padding-right: 18px; gap: 7px 14px; } }
 @media (max-width: 780px) {

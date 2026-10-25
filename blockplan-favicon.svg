@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BlockPlan cube icon">
+  <rect x="15" y="15" width="226" height="226" rx="62" fill="#283b33" transform="rotate(-6 128 128)"/>
+  <g fill="none" stroke="#fff" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M128 52 194 89v77l-66 38-66-38V89l66-37Z"/>
+    <path d="M62 89l66 37 66-37M128 126v78"/>
+  </g>
+</svg>

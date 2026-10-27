@@ -21,7 +21,7 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible { outli
 .icon { width: 17px; height: 17px; flex: 0 0 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .app { position: fixed; inset: 0; display: flex; width: 100%; height: 100dvh; min-height: 0; overflow: hidden; }
 .sidebar { display: flex; flex-direction: column; width: 274px; min-width: 274px; min-height: 0; height: 100%; background: var(--panel); border-right: 1px solid var(--border); z-index: 3; }
-.brand { display: flex; align-items: center; gap: 11px; height: 100px; padding: 24px 23px 20px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+.brand { display: flex; align-items: center; gap: 11px; height: 60px; padding: 10px 23px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
 .brand-logo { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 11px; color: white; background: #283b33; transform: rotate(-6deg); }
 .brand-logo .icon { width: 25px; height: 25px; stroke-width: 1.7; transform: rotate(6deg); }
 .brand-name { font-weight: 790; letter-spacing: -.8px; font-size: 22px; line-height: 1.08; }
@@ -97,14 +97,14 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .sidebar-footer { display: flex; align-items: center; padding: 16px 22px; gap: 9px; border-top: 1px solid var(--border); font-size: 10.5px; color: #9ca5a6; flex-shrink: 0; }
 .save-light { width: 7px; height: 7px; border-radius: 50%; background: #57bd82; box-shadow: 0 0 0 3px #eff9f1; }
 .workspace { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
-.topbar { min-height: 100px; background: white; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 29px; border-bottom: 1px solid var(--border); }
+.topbar { min-height: 60px; background: white; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 24px; border-bottom: 1px solid var(--border); }
 .project-title-wrap { min-width: 150px; display: flex; flex-direction: column; gap: 4px; }
 .overline { color: #9ca3a8; font-weight: 780; font-size: 9px; letter-spacing: 1.1px; }
 .project-title { border: 1px solid transparent; background: transparent; font-size: 22px; font-weight: 760; color: #262d2c; letter-spacing: -.65px; width: min(100%, 450px); margin-left: -4px; padding: 2px 4px; border-radius: 4px; text-overflow: ellipsis; }
 .project-title:hover { border-color: #ebeeec; }
 .project-title:focus { outline: none; background: #f9fbfa; border-color: #9bc4b0; }
 .top-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.editorbar { height: 57px; min-height: 57px; display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 0 28px; background: #fff; border-bottom: 1px solid var(--border); }
+.editorbar { height: 45px; min-height: 45px; display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 0 28px; background: #fff; border-bottom: 1px solid var(--border); }
 .editorbar-left, .editorbar-right { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
 .editorbar-left strong { font-size: 12px; }
 .floor-overline { color: #9ca4a7; font-size: 9px; font-weight: 770; letter-spacing: .85px; }
@@ -226,13 +226,13 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .workspace-heading { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 145px; }
 .workspace-heading strong { font-size: 21px; line-height: 1.15; font-weight: 790; letter-spacing: -.7px; color: #27342e; }
 .workspace-caption { font-size: 10px; color: #9aaba0; }
-.build-tabs-bar { flex: 0 0 auto; display: flex; align-items: stretch; min-height: 57px; background: #f6f8f7; border-bottom: 1px solid #dfe7e2; padding: 8px 22px 0; gap: 12px; min-width: 0; }
+.build-tabs-bar { flex: 0 0 auto; display: flex; align-items: stretch; min-height: 45px; background: #f6f8f7; border-bottom: 1px solid #dfe7e2; padding: 4px 22px 0; gap: 12px; min-width: 0; }
 .build-tabs-scroll { display: flex; flex: 1; align-items: stretch; overflow-x: auto; overflow-y: hidden; gap: 5px; min-width: 0; scrollbar-width: thin; }
-.build-tab { display: flex; flex: 0 0 auto; align-items: center; max-width: 240px; min-width: 104px; min-height: 42px; align-self: flex-end; background: #e9eeeb; border: 1px solid #e1e8e2; border-bottom: 0; border-radius: 9px 9px 0 0; padding: 0 5px 0 2px; color: #68756d; }
+.build-tab { display: flex; flex: 0 0 auto; align-items: center; max-width: 240px; min-width: 104px; min-height: 34px; align-self: flex-end; background: #e9eeeb; border: 1px solid #e1e8e2; border-bottom: 0; border-radius: 9px 9px 0 0; padding: 0 5px 0 2px; color: #68756d; }
 .build-tab:hover { background: #e5ece7; }
 .build-tab.active { background: white; color: #236c51; border-color: #c8ddce; position: relative; }
 .build-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; background: white; height: 2px; }
-.build-tab-select { display: flex; align-items: center; flex: 1; min-width: 0; min-height: 40px; gap: 8px; padding: 0 7px 0 10px; color: inherit; background: none; border: 0; text-align: left; font-weight: 640; font-size: 11.5px; }
+.build-tab-select { display: flex; align-items: center; flex: 1; min-width: 0; min-height: 32px; gap: 8px; padding: 0 7px 0 10px; color: inherit; background: none; border: 0; text-align: left; font-weight: 640; font-size: 11.5px; }
 .build-tab-select .icon { width: 15px; height: 15px; flex: 0 0 15px; color: #77897c; }
 .build-tab.active .build-tab-select .icon { color: #287a59; }
 .build-tab-select span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -246,7 +246,7 @@ kbd { display: inline-flex; justify-content: center; align-items: center; min-wi
 .tab-add:hover { background: #d6eedd; }
 .tab-add .icon { width: 14px; height: 14px; }
 @media (max-width: 1100px) {
-  .topbar { min-height: 80px; }
+  .topbar { min-height: 60px; }
   .workspace-heading strong { font-size: 17px; }
   .workspace-caption { display: none; }
   .build-tabs-bar { padding-left: 12px; padding-right: 12px; }

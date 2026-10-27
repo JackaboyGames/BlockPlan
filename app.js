@@ -11,6 +11,9 @@
   const viewport = $('viewport');
   const ctx = canvas.getContext('2d');
   const toolButtons = [...document.querySelectorAll('[data-tool]')];
+  const EXTRA_TYPES = ["toilet", "sink", "shower", "furnace", "fridge", "bath", "table", "chair", "counter"];
+  const RECT_FIXTURES = ['bath', 'table'];
+  const LINE_FIXTURES = ['counter'];
 
   const createFloor = (name, copy) => ({
     id: makeId(),
@@ -20,6 +23,7 @@
     windows: copy ? { ...copy.windows } : {},
     beds: copy ? { ...copy.beds } : {},
     stairs: copy ? { ...copy.stairs } : {},
+    fixtures: copy ? JSON.parse(JSON.stringify(copy.fixtures || {})) : {},
     labels: copy ? copy.labels.map(label => ({ ...label, id: makeId() })) : [],
     boundary: copy?.boundary ? { ...copy.boundary } : null
   });
@@ -85,6 +89,19 @@
           }
         }
       }
+      if (source.fixtures && typeof source.fixtures === 'object' && !Array.isArray(source.fixtures)) {
+        for (const [key, fixture] of Object.entries(source.fixtures)) {
+          const match = /^(\d+),(\d+)$/.exec(key);
+          if (!match || !fixture || !EXTRA_TYPES.includes(fixture.type) || !Number.isInteger(fixture.rotation) || fixture.rotation < 0 || fixture.rotation > 3) continue;
+          const anchor = { x: +match[1], y: +match[2] };
+          if (fixture.type === 'shower') {
+            if (fixtureCells(anchor, fixture).every(c => c.x >= 0 && c.y >= 0 && c.x < cols && c.y < rows)) placeFixture(floor, anchor, fixture, {cols, rows});
+          } else if (fixture.type === 'bath' || fixture.type === 'table') {
+            // A dragged bath or table is stored as occupied cells, each with its own marker.
+            if (anchor.x < cols && anchor.y < rows) placeFixture(floor, anchor, fixture, {cols, rows});
+          } else if (anchor.x < cols && anchor.y < rows) placeFixture(floor, anchor, fixture, {cols, rows});
+        }
+      }
       if (Array.isArray(source.labels)) {
         floor.labels = source.labels.slice(0, 400).filter(label => label && typeof label.text === 'string' && Number.isInteger(label.x) && Number.isInteger(label.y) && label.x >= 0 && label.y >= 0 && label.x < cols && label.y < rows).map(label => ({ id: makeId(), x: label.x, y: label.y, text: label.text.slice(0, 50) }));
       }
@@ -133,7 +150,7 @@
   let undoStack = [];
   let redoStack = [];
   let tool = 'wall';
-  const objectRotations = { door: 0, window: 0, bed: 0, stairs: 0 };
+  const objectRotations = { door: 0, window: 0, bed: 0, stairs: 0, shower: 0, toilet: 0, sink: 0, furnace: 0, fridge: 0, chair: 0 };
   let showBelow = true;
   let gesture = null;
   let selection = null; // UI-only; not written into saved plans.
@@ -155,7 +172,7 @@
     wall: 'Click and drag to draw a straight wall, with a live length',
     rectangle: 'Drag from one corner to the opposite corner to draw four connected walls',
     block: 'Click and drag to paint individual blocks',
-    select: 'Drag to select blocks, windows, doors, beds, stairs and labels, then move the group',
+    select: 'Drag to select blocks, windows, doors, beds, stairs, fixtures and labels, then move the group',
     measure: 'Drag to measure a line, or choose Area for room dimensions and square blocks',
     door: 'Click to place a door, click an existing door to rotate',
     window: 'Click for one window or drag for a row, click existing windows to rotate',
@@ -164,7 +181,16 @@
     label: 'Click a cell to add or edit a room name',
     boundary: 'Drag diagonally to set your build boundary',
     erase: 'Drag to erase blocks, windows, doors, beds, stairs and labels',
-    pan: 'Drag anywhere to move the canvas'
+    pan: 'Drag anywhere to move the canvas',
+    toilet: 'Click to place one square',
+    sink: 'Click to place one square',
+    shower: 'Click to place, press R to rotate',
+    furnace: 'Click to place one square',
+    fridge: 'Click to place one square',
+    bath: 'Drag to fill a rectangle',
+    table: 'Drag to fill a rectangle',
+    chair: 'Click to place one square',
+    counter: 'Drag to draw a row'
   };
 
   function activeProject() { return workspace.projects.find(project => project.id === workspace.activeProjectId); }
@@ -331,6 +357,7 @@
       const panelId = { select: 'selectControls', measure: 'measureControls', boundary: 'boundaryControls' }[nextTool];
       if (panelId) activeButton.after($(panelId));
       else if (Object.hasOwn(objectRotations, nextTool)) activeButton.after($('objectControls'));
+      else if (EXTRA_TYPES.includes(nextTool)) activeButton.after($('fixtureControls'));
     }
     for (const button of toolButtons) {
       const selected = button.dataset.tool === nextTool;
@@ -341,6 +368,8 @@
     $('measureControls').hidden = tool !== 'measure';
     updateMeasureControls();
     $('objectControls').hidden = !Object.hasOwn(objectRotations, tool);
+    $('fixtureControls').hidden = !EXTRA_TYPES.includes(tool) || Object.hasOwn(objectRotations,tool);
+    $('fixtureHelp').textContent=HINTS[tool] || '';
     updateObjectControls();
     $('boundaryControls').hidden = tool !== 'boundary';
     $('hintText').textContent = HINTS[tool];
@@ -385,9 +414,10 @@
 
   function updateObjectControls() {
     if (!Object.hasOwn(objectRotations, tool)) return;
-    const names = { door: 'Door', window: 'Window', bed: 'Bed', stairs: 'Stairs' };
+    const names = { door: 'Door', window: 'Window', bed: 'Bed', stairs: 'Stairs', shower: 'Shower', toilet: 'Toilet', sink: 'Sink', furnace: 'Furnace', fridge: 'Fridge', chair: 'Chair' };
     $('objectHeading').textContent = `${names[tool]} orientation`;
     $('objectAngle').textContent = `${objectRotations[tool] * 90}°`;
+    if (EXTRA_TYPES.includes(tool)) { $('objectHelp').textContent = tool === 'shower' ? 'A shower occupies three squares in an L shape. Press R to rotate it.' : 'This fixture occupies one square. Press R to change its orientation.'; return; }
     $('objectHelp').textContent = tool === 'bed'
       ? 'Beds use 1 × 2 squares. The pillow is at the head. Click an existing bed to rotate it, or press R to change the placement angle.'
       : tool === 'stairs'
@@ -477,7 +507,7 @@
       name.textContent = entry.name;
       const detail = document.createElement('span');
       detail.className = 'floor-detail';
-      detail.textContent = `${Object.keys(entry.blocks).length} blocks · ${Object.keys(entry.doors).length} doors · ${Object.keys(entry.windows).length} windows · ${Object.keys(entry.beds).length} beds · ${Object.keys(entry.stairs).length} stairs`;
+      detail.textContent = `${Object.keys(entry.blocks).length} blocks · ${Object.keys(entry.doors).length} doors · ${Object.keys(entry.windows).length} windows · ${Object.keys(entry.beds).length} beds · ${Object.keys(entry.stairs).length} stairs · ${Object.keys(entry.fixtures || {}).length} fixtures`;
       info.append(name, detail);
       switcher.append(info);
       switcher.addEventListener('click', () => { clearSelection(); state.activeFloorId = entry.id; save(); updateUI(); requestDraw(); });
@@ -501,7 +531,7 @@
 
   function updateStats() {
     const floor = activeFloor();
-    $('floorStats').textContent = `${Object.keys(floor.blocks).length} blocks · ${Object.keys(floor.doors).length} doors · ${Object.keys(floor.windows).length} windows · ${Object.keys(floor.beds).length} beds · ${Object.keys(floor.stairs).length} stairs · ${floor.labels.length} labels`;
+    $('floorStats').textContent = `${Object.keys(floor.blocks).length} blocks · ${Object.keys(floor.doors).length} doors · ${Object.keys(floor.windows).length} windows · ${Object.keys(floor.beds).length} beds · ${Object.keys(floor.stairs).length} stairs · ${Object.keys(floor.fixtures || {}).length} fixtures · ${floor.labels.length} labels`;
     const b = floor.boundary;
     $('boundaryStats').textContent = b ? `Boundary ${b.x2 - b.x1 + 1} × ${b.y2 - b.y1 + 1}` : 'No boundary set';
     $('zoomValue').textContent = `${Math.round(view.size / 24 * 100)}%`;
@@ -606,9 +636,29 @@
     }
     return null;
   }
+  function fixtureCells(anchor, fixture) {
+    if (fixture.type !== 'shower') return [anchor];
+    const patterns = [[[0,0],[1,0],[0,1]], [[0,0],[0,1],[-1,0]], [[0,0],[-1,0],[0,-1]], [[0,0],[0,-1],[1,0]]];
+    return patterns[fixture.rotation % 4].map(([dx,dy]) => ({x:anchor.x+dx,y:anchor.y+dy}));
+  }
+  function fixtureAtCell(floor, cell) {
+    for (const [key, fixture] of Object.entries(floor.fixtures || {})) {
+      const [x,y] = readKey(key);
+      if (fixtureCells({x,y}, fixture).some(c => c.x===cell.x && c.y===cell.y)) return {key, fixture};
+    }
+    return null;
+  }
+  function placeFixture(floor, anchor, fixture, dimensions = state) {
+    const cells=fixtureCells(anchor, fixture);
+    if (!cells.every(c => c.x>=0 && c.y>=0 && c.x<dimensions.cols && c.y<dimensions.rows)) return false;
+    clearOccupants(floor, cells);
+    floor.fixtures[cellKey(anchor.x,anchor.y)]={type:fixture.type,rotation:fixture.rotation};
+    return true;
+  }
   function clearOccupants(floor, cells) {
     // Erasing any half of a bed removes the whole bed, so no broken beds remain.
     const overlap = new Set();
+    const fixtureOverlap = new Set();
     for (const cell of cells) {
       const key = cellKey(cell.x, cell.y);
       delete floor.blocks[key];
@@ -617,8 +667,11 @@
       delete floor.stairs[key];
       const bed = bedAtCell(floor, cell);
       if (bed) overlap.add(bed.key);
+      const fixture = fixtureAtCell(floor, cell);
+      if (fixture) fixtureOverlap.add(fixture.key);
     }
     for (const key of overlap) delete floor.beds[key];
+    for (const key of fixtureOverlap) delete floor.fixtures[key];
   }
   function placeBlock(floor, cell) {
     clearOccupants(floor, [cell]);
@@ -678,7 +731,7 @@
   }
 
   function updateSelectionUI() {
-    $('selectionDetail').textContent = selection ? `${selection.blockKeys.length} blocks · ${selection.doorKeys.length} doors · ${selection.windowKeys.length} windows · ${selection.bedKeys.length} beds · ${selection.stairKeys.length} stairs · ${selection.labelIds.length} labels` : 'Nothing selected';
+    $('selectionDetail').textContent = selection ? `${selection.blockKeys.length} blocks · ${selection.doorKeys.length} doors · ${selection.windowKeys.length} windows · ${selection.bedKeys.length} beds · ${selection.stairKeys.length} stairs · ${selection.fixtureKeys.length} fixtures · ${selection.labelIds.length} labels` : 'Nothing selected';
     $('clearSelection').disabled = !selection;
   }
 
@@ -696,6 +749,7 @@
     const windowKeys = Object.keys(floor.windows).filter(key => { const [x, y] = readKey(key); return insideRect({ x, y }, bounds); });
     const stairKeys = Object.keys(floor.stairs).filter(key => { const [x, y] = readKey(key); return insideRect({ x, y }, bounds); });
     const bedKeys = Object.keys(floor.beds).filter(key => { const [x, y] = readKey(key); return bedCells({ x, y }, floor.beds[key]).some(cell => insideRect(cell, bounds)); });
+    const fixtureKeys = Object.keys(floor.fixtures || {}).filter(key => { const [x,y]=readKey(key); return fixtureCells({x,y},floor.fixtures[key]).some(cell=>insideRect(cell,bounds)); });
     const labelIds = floor.labels.filter(label => insideRect(label, bounds)).map(label => label.id);
     // If a bed's head alone was selected, include the whole bed in the move boundary.
     const selectionBounds = { ...bounds };
@@ -708,8 +762,15 @@
         selectionBounds.y2 = Math.max(selectionBounds.y2, cell.y);
       }
     }
-    selection = blockKeys.length || doorKeys.length || windowKeys.length || bedKeys.length || stairKeys.length || labelIds.length
-      ? { bounds: selectionBounds, blockKeys, doorKeys, windowKeys, bedKeys, stairKeys, labelIds } : null;
+    for (const key of fixtureKeys) {
+      const [x,y]=readKey(key);
+      for (const c of fixtureCells({x,y},floor.fixtures[key])) {
+        selectionBounds.x1=Math.min(selectionBounds.x1,c.x); selectionBounds.y1=Math.min(selectionBounds.y1,c.y);
+        selectionBounds.x2=Math.max(selectionBounds.x2,c.x); selectionBounds.y2=Math.max(selectionBounds.y2,c.y);
+      }
+    }
+    selection = fixtureKeys.length || blockKeys.length || doorKeys.length || windowKeys.length || bedKeys.length || stairKeys.length || labelIds.length
+      ? { bounds: selectionBounds, blockKeys, doorKeys, windowKeys, bedKeys, stairKeys, fixtureKeys, labelIds } : null;
     updateSelectionUI();
     updateCursor();
   }
@@ -734,6 +795,7 @@
     const windows = selection.windowKeys.filter(key => Object.hasOwn(floor.windows, key)).map(key => ({ cell: readKey(key), rotation: floor.windows[key] }));
     const stairs = selection.stairKeys.filter(key => Object.hasOwn(floor.stairs, key)).map(key => ({ cell: readKey(key), rotation: floor.stairs[key] }));
     const beds = selection.bedKeys.filter(key => Object.hasOwn(floor.beds, key)).map(key => ({ cell: readKey(key), rotation: floor.beds[key] }));
+    const fixtures = selection.fixtureKeys.map(key=>({cell:readKey(key),fixture:{...floor.fixtures[key]}}));
     const ids = new Set(selection.labelIds);
     const labels = floor.labels.filter(label => ids.has(label.id));
 
@@ -743,11 +805,13 @@
     for (const key of selection.windowKeys) delete floor.windows[key];
     for (const key of selection.stairKeys) delete floor.stairs[key];
     for (const key of selection.bedKeys) delete floor.beds[key];
+    for (const key of selection.fixtureKeys) delete floor.fixtures[key];
     for (const [x, y] of blocks) placeBlock(floor, { x: x + dx, y: y + dy });
     for (const { cell: [x, y], rotation } of doors) placeDoor(floor, { x: x + dx, y: y + dy }, rotation);
     for (const { cell: [x, y], rotation } of windows) placeWindow(floor, { x: x + dx, y: y + dy }, rotation);
     for (const { cell: [x, y], rotation } of stairs) placeStair(floor, { x: x + dx, y: y + dy }, rotation);
     for (const { cell: [x, y], rotation } of beds) placeBed(floor, { x: x + dx, y: y + dy }, rotation);
+    for (const {cell:[x,y],fixture} of fixtures) placeFixture(floor,{x:x+dx,y:y+dy},fixture);
     for (const label of labels) { label.x += dx; label.y += dy; }
 
     selection = {
@@ -757,6 +821,7 @@
       windowKeys: windows.map(({ cell: [x, y] }) => cellKey(x + dx, y + dy)),
       stairKeys: stairs.map(({ cell: [x, y] }) => cellKey(x + dx, y + dy)),
       bedKeys: beds.map(({ cell: [x, y] }) => cellKey(x + dx, y + dy)),
+      fixtureKeys: fixtures.map(({cell:[x,y]})=>cellKey(x+dx,y+dy)),
       labelIds: [...selection.labelIds]
     };
     updateSelectionUI();
@@ -772,6 +837,7 @@
       for (const key of selection.windowKeys) delete floor.windows[key];
       for (const key of selection.stairKeys) delete floor.stairs[key];
       for (const key of selection.bedKeys) delete floor.beds[key];
+      for (const key of selection.fixtureKeys) delete floor.fixtures[key];
       const labels = new Set(selection.labelIds);
       floor.labels = floor.labels.filter(label => !labels.has(label.id));
     });
@@ -780,15 +846,15 @@
 
   function updateWallMeasure(event) {
     const badge = $('wallMeasure');
-    if (!gesture || !['wall', 'rectangle', 'window', 'measure'].includes(gesture.mode)) { badge.hidden = true; return; }
+    if (!gesture || !['wall', 'rectangle', 'window', 'measure', 'bath', 'table', 'counter'].includes(gesture.mode)) { badge.hidden = true; return; }
     if (gesture.mode === 'measure') {
       badge.textContent = measurementInfo({ type: gesture.measureType, start: gesture.start, end: gesture.current }).badge;
-    } else if (gesture.mode === 'rectangle') {
+    } else if (['rectangle','bath','table'].includes(gesture.mode)) {
       const bounds = makeBoundary(gesture.start, gesture.current);
       badge.textContent = `${bounds.x2 - bounds.x1 + 1} × ${bounds.y2 - bounds.y1 + 1} blocks`;
     } else {
       const distance = lineCells(gesture.start, gesture.current, true).length;
-      badge.textContent = `${distance} ${gesture.mode === 'window' ? 'window' : 'block'}${distance === 1 ? '' : 's'}`;
+      badge.textContent = `${distance} ${gesture.mode === 'window' ? 'window' : gesture.mode === 'counter' ? 'counter' : 'block'}${distance === 1 ? '' : 's'}`;
     }
     badge.hidden = false;
     const point = pointerPosition(event);
@@ -858,6 +924,18 @@
         if (existing) delete floor.beds[existing.key];
         placeBed(floor, anchor, rotation);
       });
+      return;
+    }
+    if (EXTRA_TYPES.includes(tool) && !RECT_FIXTURES.includes(tool) && !LINE_FIXTURES.includes(tool) && event.button === 0) {
+      if (tool === 'shower') {
+        const existing=fixtureAtCell(activeFloor(),cell);
+        const same=existing?.fixture.type==='shower';
+        const [ax,ay]=same?readKey(existing.key):[cell.x,cell.y];
+        const anchor={x:ax,y:ay};
+        const rotation=same?(existing.fixture.rotation+1)%4:objectRotations.shower;
+        if (!fixtureCells(anchor,{type:'shower',rotation}).every(inBounds)) {showToast('The three shower blocks need to fit on the grid.');return;}
+        change(()=>{if(same)delete activeFloor().fixtures[existing.key];placeFixture(activeFloor(),anchor,{type:'shower',rotation});});
+      } else change(()=>placeFixture(activeFloor(),cell,{type:tool,rotation:objectRotations[tool]||0}));
       return;
     }
     const mode = event.button === 2 ? 'erase' : tool;
@@ -931,6 +1009,13 @@
           for (const cell of cells) placeWindow(floor, cell, rotation);
         }
       }
+    } else if (RECT_FIXTURES.includes(done.mode)) {
+      if(last) {
+        const bounds=makeBoundary(done.start,last);
+        for(let row=bounds.y1;row<=bounds.y2;row++) for(let col=bounds.x1;col<=bounds.x2;col++) placeFixture(activeFloor(),{x:col,y:row},{type:done.mode,rotation:0});
+      }
+    } else if (done.mode === 'counter') {
+      if(last) for(const cell of lineCells(done.start,last,true)) placeFixture(activeFloor(),cell,{type:'counter',rotation:0});
     } else if (done.mode === 'boundary') {
       if (last) activeFloor().boundary = makeBoundary(done.start, last);
     } else if (done.mode === 'select') {
@@ -1220,6 +1305,29 @@
     context.restore();
   }
 
+  const FIXTURE_VISUALS = {
+    toilet:['WC','#d5e9eb'], sink:['S','#cce8e9'], shower:['SH','#b2e5eb'], furnace:['F','#e8d6cd'],
+    fridge:['FR','#d9e5ee'], bath:['B','#cce8f0'], table:['T','#e9dac5'], chair:['C','#e1d1ad'],counter:['K','#d4dbd3']
+  };
+  function drawFixture(context,x,y,size,fixture,alpha=1) {
+    const [label,color]=FIXTURE_VISUALS[fixture.type] || ['?','#ddd'];
+    context.save();context.globalAlpha*=alpha;
+    context.fillStyle=color;
+    context.fillRect(x+size*.07,y+size*.07,size*.86,size*.86);
+    context.strokeStyle='#57717a';context.lineWidth=Math.max(.8,size*.055);
+    context.strokeRect(x+size*.12,y+size*.12,size*.76,size*.76);
+    context.fillStyle='#27424b';context.textAlign='center';context.textBaseline='middle';
+    context.font=`bold ${Math.max(5,Math.min(12,size*.38))}px system-ui`;
+    context.fillText(label,x+size*.5,y+size*.53,size*.8);
+    context.restore();
+  }
+  function paintFixtures(context,fixtures,x,y,size,alpha=1,omit=null,dx=0,dy=0) {
+    for(const [key,fixture] of Object.entries(fixtures || {})) {
+      if(omit?.has(key))continue;
+      const [col,row]=readKey(key);
+      for(const cell of fixtureCells({x:col,y:row},fixture))drawFixture(context,x+(cell.x+dx)*size,y+(cell.y+dy)*size,size,fixture,alpha);
+    }
+  }
   function renderBoard(context, x, y, size, options = {}) {
     const width = state.cols * size, height = state.rows * size;
     context.save();
@@ -1263,12 +1371,14 @@
       }
     }
     drawBoundary(context, floor.boundary, x, y, size);
+    if(options.ghost && activeIndex()>0) paintFixtures(context,state.floors[activeIndex()-1].fixtures,x,y,size,.17);
     const moving = options.preview && gesture?.mode === 'move-selection' && selection;
     const excludedBlocks = moving ? new Set(selection.blockKeys) : null;
     const excludedDoors = moving ? new Set(selection.doorKeys) : null;
     const excludedWindows = moving ? new Set(selection.windowKeys) : null;
     const excludedStairs = moving ? new Set(selection.stairKeys) : null;
     const excludedBeds = moving ? new Set(selection.bedKeys) : null;
+    const excludedFixtures = moving ? new Set(selection.fixtureKeys) : null;
     const excludedLabels = moving ? new Set(selection.labelIds) : null;
     const visibleBlocks = excludedBlocks ? Object.fromEntries(Object.entries(floor.blocks).filter(([key]) => !excludedBlocks.has(key))) : floor.blocks;
     paintBlocks(context, visibleBlocks, x, y, size);
@@ -1292,6 +1402,7 @@
       const [col, row] = readKey(key);
       drawBed(context, x + col * size, y + row * size, size, rotation);
     }
+    paintFixtures(context,floor.fixtures,x,y,size,1,excludedFixtures);
     if (options.preview && ['wall', 'rectangle'].includes(gesture?.mode)) {
       const cells = gesture.mode === 'wall' ? lineCells(gesture.start, gesture.current, true) : perimeterCells(gesture.start, gesture.current);
       paintBlocks(context, Object.fromEntries(cells.map(c => [cellKey(c.x, c.y), true])), x, y, size, 'rgba(32, 138, 97, .7)');
@@ -1301,6 +1412,11 @@
       const rotation = windowRunRotation(gesture.start, gesture.current);
       for (const cell of cells) drawWindow(context, x + cell.x * size, y + cell.y * size, size, rotation, .75);
     }
+    if (options.preview && RECT_FIXTURES.includes(gesture?.mode)) {
+      const b=makeBoundary(gesture.start,gesture.current);
+      for(let row=b.y1;row<=b.y2;row++)for(let col=b.x1;col<=b.x2;col++)drawFixture(context,x+col*size,y+row*size,size,{type:gesture.mode},.55);
+    }
+    if (options.preview && gesture?.mode === 'counter') for(const c of lineCells(gesture.start,gesture.current,true))drawFixture(context,x+c.x*size,y+c.y*size,size,{type:'counter'},.6);
     if (options.preview && gesture?.mode === 'boundary') drawBoundary(context, makeBoundary(gesture.start, gesture.current), x, y, size, true);
     if (options.preview && hovered && !gesture && tool !== 'pan' && !spaceDown) {
       context.fillStyle = 'rgba(49, 133, 93, .12)';
@@ -1308,6 +1424,10 @@
       context.lineWidth = 2;
       context.strokeStyle = '#4f9a76';
       context.strokeRect(x + hovered.x * size + 1, y + hovered.y * size + 1, size - 2, size - 2);
+      if (EXTRA_TYPES.includes(tool) && !RECT_FIXTURES.includes(tool) && !LINE_FIXTURES.includes(tool)) {
+        const fixture={type:tool,rotation:objectRotations[tool]||0};
+        if(fixtureCells(hovered,fixture).every(inBounds))for(const c of fixtureCells(hovered,fixture))drawFixture(context,x+c.x*size,y+c.y*size,size,fixture,.47);
+      }
       if (tool === 'bed' && bedCells(hovered, objectRotations.bed).every(inBounds)) drawBed(context, x + hovered.x * size, y + hovered.y * size, size, objectRotations.bed, .47);
       if (tool === 'window') drawWindow(context, x + hovered.x * size, y + hovered.y * size, size, objectRotations.window, .52);
       if (tool === 'stairs') drawStair(context, x + hovered.x * size, y + hovered.y * size, size, objectRotations.stairs, .48);
@@ -1351,6 +1471,7 @@
           const [col, row] = readKey(key);
           drawBed(context, x + (col + dx) * size, y + (row + dy) * size, size, floor.beds[key]);
         }
+        paintFixtures(context,floor.fixtures,x,y,size,1,new Set(Object.keys(floor.fixtures).filter(k=>!selection.fixtureKeys.includes(k))),dx,dy);
         drawLabels(context, floor.labels.filter(label => excludedLabels.has(label.id)).map(label => ({ ...label, x: label.x + dx, y: label.y + dy })), x, y, size);
         drawSelectionOutline(context, b, x, y, size);
       } else if (gesture?.mode === 'select') {
@@ -1430,6 +1551,10 @@
             for (const key of Object.keys(floor.beds)) {
               const [x, y] = readKey(key);
               if (bedCells({ x, y }, floor.beds[key]).some(cell => cell.x >= cols || cell.y >= rows)) delete floor.beds[key];
+            }
+            for (const [key,fixture] of Object.entries(floor.fixtures || {})) {
+              const [x,y]=readKey(key);
+              if(fixtureCells({x,y},fixture).some(c=>c.x<0||c.y<0||c.x>=cols||c.y>=rows))delete floor.fixtures[key];
             }
             for (const key of Object.keys(floor.stairs)) { const [x, y] = readKey(key); if (x >= cols || y >= rows) delete floor.stairs[key]; }
             for (const key of Object.keys(floor.windows)) { const [x, y] = readKey(key); if (x >= cols || y >= rows) delete floor.windows[key]; }

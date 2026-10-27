@@ -56,7 +56,7 @@
           <div class="section-header"><h2>Tools</h2><span>SHORTCUT</span></div>
           <div class="tool-groups" id="toolList">
             <details class="tool-group" open>
-              <summary class="tool-group-header"><span class="tool-group-mark"><svg class="icon"><use href="#i-wall"></use></svg></span><span class="tool-group-title">Build tools<small>Walls and outline</small></span><span class="tool-group-count">4</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <summary class="tool-group-header"><span class="tool-group-mark"><svg class="icon"><use href="#i-wall"></use></svg></span><span class="tool-group-title">Build tools<small>Walls and outline</small></span><span class="tool-group-count">13</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
               <div class="tool-list">
                 <button type="button" class="tool active" data-tool="wall" aria-pressed="true"><span class="tool-icon"><svg class="icon"><use href="#i-wall"></use></svg></span><span>Wall line</span><kbd>W</kbd></button>
                 <button type="button" class="tool" data-tool="rectangle" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-rectangle"></use></svg></span><span>Rectangle walls</span><kbd>Q</kbd></button>
@@ -76,10 +76,35 @@
                 <button type="button" class="tool" data-tool="bed" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-bed"></use></svg></span><span>Bed (1 × 2)</span><kbd>F</kbd></button>
                 <button type="button" class="tool" data-tool="stairs" aria-pressed="false"><span class="tool-icon"><svg class="icon"><use href="#i-stairs"></use></svg></span><span>Stairs</span><kbd>G</kbd></button>
               </div>
+              <div class="object-controls" id="fixtureControls" hidden><p id="fixtureHelp">Drag to place.</p></div>
               <div class="object-controls" id="objectControls" hidden>
                 <div class="detail-row"><span id="objectHeading">Orientation</span><strong id="objectAngle">0°</strong></div>
                 <button type="button" class="button button-outline button-full" id="rotateObject"><svg class="icon"><use href="#i-rotate"></use></svg> Rotate <kbd>R</kbd></button>
                 <p id="objectHelp">Press R to rotate before placing an object.</p>
+              </div>
+            </details>
+            <details class="tool-group" open>
+              <summary class="tool-group-header"><span class="tool-group-mark"><span style="font-size:16px">◈</span></span><span class="tool-group-title">Bathroom<small>Bathroom fixtures</small></span><span class="tool-group-count">4</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <div class="tool-list">
+                <button type="button" class="tool" data-tool="toilet" aria-pressed="false"><span class="tool-icon">◈</span><span>Toilet</span></button>
+                <button type="button" class="tool" data-tool="sink" aria-pressed="false"><span class="tool-icon">◈</span><span>Sink</span></button>
+                <button type="button" class="tool" data-tool="shower" aria-pressed="false"><span class="tool-icon">◈</span><span>Shower (L, 3 blocks)</span></button>
+                <button type="button" class="tool" data-tool="bath" aria-pressed="false"><span class="tool-icon">◈</span><span>Bath (drag to fill)</span></button>
+              </div>
+            </details>
+            <details class="tool-group" open>
+              <summary class="tool-group-header"><span class="tool-group-mark"><span style="font-size:16px">◈</span></span><span class="tool-group-title">Kitchen<small>Kitchen appliances and counters</small></span><span class="tool-group-count">3</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <div class="tool-list">
+                <button type="button" class="tool" data-tool="furnace" aria-pressed="false"><span class="tool-icon">◈</span><span>Furnace</span></button>
+                <button type="button" class="tool" data-tool="fridge" aria-pressed="false"><span class="tool-icon">◈</span><span>Fridge</span></button>
+                <button type="button" class="tool" data-tool="counter" aria-pressed="false"><span class="tool-icon">◈</span><span>Counter (drag line)</span></button>
+              </div>
+            </details>
+            <details class="tool-group" open>
+              <summary class="tool-group-header"><span class="tool-group-mark"><span style="font-size:16px">◈</span></span><span class="tool-group-title">Furniture<small>Tables and seating</small></span><span class="tool-group-count">2</span><svg class="icon group-chevron"><use href="#i-chevron"></use></svg></summary>
+              <div class="tool-list">
+                <button type="button" class="tool" data-tool="table" aria-pressed="false"><span class="tool-icon">◈</span><span>Table (drag to fill)</span></button>
+                <button type="button" class="tool" data-tool="chair" aria-pressed="false"><span class="tool-icon">◈</span><span>Chair</span></button>
               </div>
             </details>
             <details class="tool-group" open>
@@ -211,11 +236,20 @@
         <div class="help-item"><div><strong>Door</strong><kbd>D</kbd></div><p>Place a door in one square. Click an existing door to turn it, or press R before placing.</p></div>
         <div class="help-item"><div><strong>Window</strong><kbd>X</kbd></div><p>Place a blue window in a wall or drag to make a row. A window replaces a wall block in that square.</p></div>
         <div class="help-item"><div><strong>Bed</strong><kbd>F</kbd></div><p>Place a two-square bed with a marked pillow end. Rotate to position the head of the bed.</p></div>
+        <div class="help-item"><div><strong>Toilet</strong></div><p>Place one square.</p></div>
+        <div class="help-item"><div><strong>Sink</strong></div><p>Place one square.</p></div>
+        <div class="help-item"><div><strong>Shower</strong></div><p>Three squares in a rotatable L shape.</p></div>
+        <div class="help-item"><div><strong>Furnace</strong></div><p>Place one square.</p></div>
+        <div class="help-item"><div><strong>Fridge</strong></div><p>Place one square.</p></div>
+        <div class="help-item"><div><strong>Bath</strong></div><p>Drag between corners to fill a rectangular area.</p></div>
+        <div class="help-item"><div><strong>Table</strong></div><p>Drag between corners to fill a rectangular area.</p></div>
+        <div class="help-item"><div><strong>Chair</strong></div><p>Place one square.</p></div>
+        <div class="help-item"><div><strong>Counter</strong></div><p>Drag a line of counter blocks.</p></div>
         <div class="help-item"><div><strong>Stairs</strong><kbd>G</kbd></div><p>Click or drag to mark a staircase. Lines show steps and the arrow indicates which way it faces.</p></div>
       </section>
       <section class="help-section">
         <h3><svg class="icon"><use href="#i-select"></use></svg> Edit &amp; navigate</h3>
-        <div class="help-item"><div><strong>Select &amp; move</strong><kbd>S</kbd></div><p>Drag to select blocks, windows, doors, beds, stairs and labels. Then drag inside the selection to move everything together.</p></div>
+        <div class="help-item"><div><strong>Select &amp; move</strong><kbd>S</kbd></div><p>Drag to select blocks, windows, doors, beds, stairs, bathroom or kitchen fixtures and labels. Then drag inside the selection to move everything together.</p></div>
         <div class="help-item"><div><strong>Measure</strong><kbd>M</kbd></div><p>Choose <b>Line</b> to measure between two squares or <b>Area</b> to measure a room by dragging across its interior. The tool shows width × depth and area in blocks². Measurements never change the saved build.</p></div>
         <div class="help-item"><div><strong>Eraser</strong><kbd>E</kbd></div><p>Click or drag to remove items. Right-click and drag to erase with any drawing tool.</p></div>
         <div class="help-item"><div><strong>Room label</strong><kbd>T</kbd></div><p>Give rooms names like Kitchen or Bathroom. Labels are notes and do not represent Minecraft blocks.</p></div>
